@@ -46,28 +46,42 @@ fn second_problem() -> i32 {
         .count() as i32
 }
 
-fn check_level_second(mut level: Vec<i32>, shield: bool) -> bool {
+fn check_level_second(level: Vec<i32>, shield: bool) -> bool {
     let is_increasing = level[0] < level[1];
     for i in 1..level.len() {
         match is_increasing {
             true => {
                 let diff = level[i] - level[i - 1];
                 if (diff.is_positive() && diff.abs() <= 3) == false {
-                    level.remove(i - i);
-                    return shield && check_level_second(level, false);
+                    return call_to_unsafe(level, shield, i);
                 }
             }
             false => {
                 let diff = level[i] - level[i - 1];
                 if (diff.is_negative() && diff.abs() <= 3) == false {
-                    level.remove(i - i);
-                    return shield && check_level_second(level, false);
+                    return call_to_unsafe(level, shield, i);
                 }
             }
         }
     }
 
     true
+}
+
+fn call_to_unsafe(mut level: Vec<i32>, shield: bool, i: usize) -> bool {
+    let mut is_first_valid = false;
+    if i == 2 {
+        let mut first = level.clone();
+        first.remove(i - 2);
+        is_first_valid = check_level_second(first, false);
+    }
+    let mut current = level.clone();
+    level.remove(i - 1);
+    current.remove(i);
+    return shield
+        && (check_level_second(level, false)
+            || check_level_second(current, false)
+            || is_first_valid);
 }
 
 fn read_file(file_name: &str) -> Vec<Vec<i32>> {
